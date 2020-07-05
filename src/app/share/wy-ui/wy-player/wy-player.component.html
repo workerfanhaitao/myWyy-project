@@ -1,0 +1,80 @@
+<div class="m-player"
+  appClickoutside
+  (onClickOutSide)="onClickOutSide($event)"
+  [bindFlag]="bindFlag"
+  (mouseenter)="togglePlayer('show')"
+  (mouseleave)="togglePlayer('hide')"
+  [@showHide]="showPlayer"
+  (@showHide.start)="animating = true"
+  (@showHide.done)="onAnimateDone($event)"
+>
+  <div class="lock" (click)="isLocked = !isLocked">
+    <div class="left"><i [class.locked]='isLocked'></i></div>
+  </div>
+  <div class="hand"></div>
+  <div class="container">
+    <div class="wrap">
+      <div class="btns">
+        <i class="prev" (click)="onPrev(currentIndex - 1)"></i>
+        <i class="toggle" [class.playing]="playing" (click)="onToggle()"></i>
+        <i class="next" (click)="onNext(currentIndex + 1)"></i>
+      </div>
+      <div class="head" (click)="toInfo(['/song-info', currentSong && currentSong.id])">
+        <img [src]="picUrl">
+        <i class="mask"></i>
+      </div>
+      <div class="play">
+        <div class="words clearfix">
+          <p class="ellipsis margin-bottom-none" (click)="toInfo(['/song-info', currentSong.id])">{{currentSong?.name}}</p>
+          <ul class="songs clearfix margin-bottom-none">
+            <li *ngFor="let item of currentSong?.ar; last as isLast">
+              <a (click)="toInfo(['/singer', item.id])">{{item.name}}</a>
+              <span [hidden]="isLast">/</span>
+            </li>
+          </ul>
+        </div>
+        <div class="bar">
+          <div class="slider-wrap">
+            <app-wy-slider [(ngModel)]="percent" (wyOnAfterChange)="onPercentChange($event)" [bufferPercent]="bufferPercent"></app-wy-slider>
+          </div>
+          <span class="time">
+            <em>{{currentTime | formatTime}}</em>/ {{ duration | formatTime }}
+          </span>
+        </div>
+      </div>
+      <div class="oper">
+        <i class="like" title="收藏" (click)="onLikeSong(currentSong)"></i>
+        <i class="share" title="分享" (click)="onShareSong(currentSong)"></i>
+      </div>
+      <div class="ctrl">
+        <i class="volume" title="音量" (click)="toggleVolumePanel($event)"></i>
+        <i [ngClass]="currentPlayMode.type" [title]="currentPlayMode.label" (click)="changePlayMode()"></i>
+        <p
+        nzOverlayClassName="tip-bg"
+        class="open"
+        (click)="togglePlayListPanel($event)"[nzTooltipTitle]="controlTooltip.title"
+        [nzVisible]="controlTooltip.show"
+        nz-tooltip>
+          <span></span>
+        </p>
+        <div class="control-vol" [hidden]="!showVolumePanel">
+          <app-wy-slider [wyVertical]="true" [(ngModel)]="volume" (ngModelChange)="onVolumeChange($event)"></app-wy-slider>
+        </div>
+      </div>
+      <app-wy-player-panel
+      [hidden]="!showPlayListPanel"
+      [songList]="songList"
+      [currentSong]="currentSong"
+      [showPanel]="showPlayListPanel"
+      [playing]="playing"
+      (onClose)="showPlayListPanel = false"
+      (onPlayThisSong)="onPlayThisSong($event)"
+      (onDeleteSong)="onDeleteSong($event)"
+      (onClearSong)="onClearSong()"
+      (onLikeSong)="onLikeSong($event)"
+      (onShareSong)="onShareSong($event)"
+      ></app-wy-player-panel>
+    </div>
+  </div>
+  <audio #audio [src]="currentSong?.url" (timeupdate)="onTimeUpdate($event)" (canplay)="onCanplay()" (ended)="onEnded()"></audio>
+</div>
